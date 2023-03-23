@@ -1,98 +1,157 @@
-const modal = document.querySelector('#modal'),
-      modalShow = document.querySelector('#show-modal'),
-      modalClose= document.querySelector('#closed-modal'),
-      bookmarkForm = document.querySelector('#book-mark-form'),
-      websiteNameEl = document.querySelector('#website-name'),
-      websiteUrlEl = document.querySelector('#website-url'),
-      bookmarksContainer = document.querySelector('#bookmarks-container');
+const modal = document.getElementById("modal");
+const modalShow = document.getElementById("show-modal");
+const modalClose = document.getElementById("closed-modal");
+const bookmarkForm = document.getElementById("book-mark-form");
+const websiteNameEl = document.getElementById("website-name");
+const websiteUrlEl = document.getElementById("website-url");
+const bookmarksContainer = document.getElementById("bookmarks-conatiner");
 
+// array of bookmarks
+let bookmarks = [];
 
-
-// Array of bookmaks
-let bookmaksArr =[]
-
-// Show Modal,Focus on Input
-const showModal =()=>{
-    modal.classList.add('show-modal');
-    websiteNameEl.focus();
+//Show Modal, Focus on first input
+function showModal() {
+  modal.classList.add("show-modal");
+  websiteNameEl.focus(); //cursor goes to first line
 }
 
-// Modal Event Listner
-modalShow.addEventListener('click',showModal)
-modalClose.addEventListener('click',() => modal.classList.remove('show-modal'))
-// Remove model with anywhere click
-window.addEventListener('click',(e)=> (e.target == modal) ? modal.classList.remove('show-modal') : false )
+// Modal Event Listener
+modalShow.addEventListener("click", showModal);
+modalClose.addEventListener("click", () => {
+  modal.classList.remove("show-modal");
+});
 
+// Add event listener to window
+window.addEventListener("click", (e) =>
+  e.target === modal ? modal.classList.remove("show-modal") : false
+);
 
-// Validate Form 
-const validate =(nameValue,urlValue)=>{
-    const expression = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g;
-    const regex = new RegExp(expression);
-    if(!nameValue || !urlValue){
-        alert('Ops, Please Submit value for both fields')
-    }
-    if(urlValue.match(regex)){
-        alert('match')
-    }
-    if(!urlValue.match(regex)){
-        alert("Please Provide a valid web address")
-        return false;
-    }
-    //valid
-    return true;
-}
-// Fetch BookMarks From Local Storage
-const fetchBookMark =()=>{
-    // Get books from local storage if there is it
-    if(localStorage.getItem('bookmarks')){
-        bookmaksArr = JSON.parse(localStorage.getItem('bookmarks'))
-    }
-    else{
-        bookmaksArr=[
-            {
-                name:'Hem Pun',
-                url:'hembdrpun.com.np'
-            },
-            {
-                name:'Google',
-                url:'google.com'
-            },
-            {
-                name:'Gmail',
-                url:'gmail.com'
-            }
-        ]
-        localStorage.setItem('bookmarks',JSON.stringify('bookmarks'))
-    }
-    console.log(bookmaksArr);
+// Validate Form
+function validate(nameValue, urlValue) {
+  const expression =
+    /(https)?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/g;
+  const regex = new RegExp(expression);
+  if (!nameValue || !urlValue) {
+    alert("Please submit values for both fields.");
+    return false;
+  }
+  if (!urlValue.match(regex)) {
+    alert("Please provide a valid web address.");
+    return false;
+  }
+  // Valid
+  return true;
 }
 
-// Handle Date from Form
-const storeBookmark =(e)=>{
-    e.preventDefault();
-    const nameValue = websiteNameEl.value;
-    let UrlValue = websiteUrlEl.value;
-    if(!UrlValue.includes('http://','https://')){
-        UrlValue = `https://${UrlValue}`
-    }
-   if(!validate(nameValue,UrlValue)){
-    return false
-   }
-   const bookmak ={
-    name:nameValue,
-    url:UrlValue,
-   };
-   bookmaksArr.push(bookmak)
-   console.log(bookmaksArr);
-   localStorage.setItem('bookmarks',JSON.stringify(bookmaksArr))
-   fetchBookMark();
-   bookmarkForm.reset()
-   websiteNameEl.focus();
+function buildBookmarksDOM() {
+  //Remove all bookmarks elements
+  bookmarksContainer.textContent = " ";
 
+  //Build items
+  bookmarks.forEach((bookmark) => {
+    const { name, url } = bookmark;
+    // console.log(name, url);
+
+    //Create element one at a time
+    const item = document.createElement("div");
+    item.classList.add("item");
+
+    //Close Icon
+    const closeIcon = document.createElement("i");
+    closeIcon.classList.add("bx", "bxs-trash");
+    closeIcon.setAttribute("title", "Delete Bookmark");
+    closeIcon.setAttribute("onclick", `deleteBookmark('${url}')`); //call deleteBookmark()
+
+    //Favicon / Link Container
+    const linkInfo = document.createElement("div");
+    linkInfo.classList.add("name");
+
+    //Favicon
+    const favicon = document.createElement("img");
+    favicon.setAttribute(
+      "src",
+      `https://s2.googleusercontent.com/s2/favicons?domain=${url}`
+    );
+    favicon.setAttribute("alt", "Favicon");
+
+    //Link
+    const link = document.createElement("a");
+    link.setAttribute("href", `${url}`);
+    link.setAttribute("target", "_blank");
+    link.textContent = name;
+
+    //Append to bookmarks container
+    linkInfo.append(favicon, link);
+    item.append(closeIcon, linkInfo);
+    bookmarksContainer.appendChild(item);
+  });
 }
 
-// Event LSitner
-bookmarkForm.addEventListener('submit',storeBookmark)
+//Fetch Bookmark
+function fetchBookmarks() {
+  //json parse to take string convert to object
+  //get bookmark from local storage if available
+  if (localStorage.getItem("bookmarks")) {
+    bookmarks = JSON.parse(localStorage.getItem("bookmarks"));
+  } else {
+    //create bookmarks array in local storate, create a sample
+    bookmarks = [
+      {
+        name: "Hem Bahadur Pun",
+        url: "https://www.linkedin.com/in/hem-bahadur-pun-0621aa21a/",
+      },
+    ];
+    localStorage.setItem("bookmarks", JSON.stringify(bookmarks));
+  }
+  //   console.log(bookmarks);
+  buildBookmarksDOM();
+}
 
-// On Load 
-fetchBookMark()
+//Delete Bookmark
+function deleteBookmark(url) {
+  //pass the url, loop thru array, if matched remove it
+  bookmarks.forEach((bookmark, i) => {
+    if (bookmark.url === url) {
+      bookmarks.splice(i, 1); //delete bookmark at index i and remove 1 thing
+    }
+  });
+  //update bookmarks array in localStorage, repopulate DOM
+  localStorage.setItem("bookmarks", JSON.stringify(bookmarks));
+  fetchBookmarks();
+}
+
+//Handle Data From Form
+function storeBookmark(e) {
+  //prevent it from submit form to web server via network
+  e.preventDefault();
+  //   console.log(e);
+
+  const nameValue = websiteNameEl.value;
+  let urlValue = websiteUrlEl.value; // make it a let to add https dynamically
+
+  if (!urlValue.includes("http://", "https://")) {
+    urlValue = `https://${urlValue}`;
+  }
+
+  console.log(nameValue, urlValue);
+  if (!validate(nameValue, urlValue)) {
+    return false;
+  }
+
+  const bookmark = {
+    name: nameValue,
+    url: urlValue,
+  };
+  bookmarks.push(bookmark);
+  //   console.log(bookmarks);
+  localStorage.setItem("bookmarks", JSON.stringify(bookmarks)); // it needed to be stringify before send to server
+  fetchBookmarks();
+  bookmarkForm.reset();
+  websiteNameEl.focus();
+}
+
+// Event listener for form\
+bookmarkForm.addEventListener("submit", storeBookmark);
+
+//On load, fetch bookmarks
+fetchBookmarks();
