@@ -38,6 +38,30 @@
             </div>
         </div>
     </div>
+    <!-- Modal -->
+    <div class="modal-container show-modal" id="modal">
+        <div class="modal">
+            <i class="bx bx-x-circle" id="closed-modal" title="Close"></i>
+            <div class="modal-header">
+                <h3>Add Book Mark</h3>
+            </div>
+            <div class="modal-content">
+                <form id="book-mark-form">
+                    <!-- Website Name -->
+                    <div class="form-group">
+                        <label for="website-name" class="form-label">Website Name</label>
+                        <input type="text" name="website-name" id="website-name" class="form-input">
+                    </div>
+                    <!-- Website URL -->
+                    <div class="form-group">
+                        <label for="website-url" class="form-label">Website URL</label>
+                        <input type="text" name="website-url" id="website-url" class="form-input">
+                    </div>
+                    <button type="submit">Save</button>
+                </form>
+            </div>
+        </div>
+    </div>
     <!-- Script -->
     <script src="app.js"></script>
 </body>
