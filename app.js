@@ -8,6 +8,8 @@ const modal = document.querySelector('#modal'),
 
 
 
+// Array of bookmaks
+let bookmaksArr =[]
 
 // Show Modal,Focus on Input
 const showModal =()=>{
@@ -39,6 +41,31 @@ const validate =(nameValue,urlValue)=>{
     //valid
     return true;
 }
+// Fetch BookMarks From Local Storage
+const fetchBookMark =()=>{
+    // Get books from local storage if there is it
+    if(localStorage.getItem('bookmarks')){
+        bookmaksArr = JSON.parse(localStorage.getItem('bookmarks'))
+    }
+    else{
+        bookmaksArr=[
+            {
+                name:'Hem Pun',
+                url:'hembdrpun.com.np'
+            },
+            {
+                name:'Google',
+                url:'google.com'
+            },
+            {
+                name:'Gmail',
+                url:'gmail.com'
+            }
+        ]
+        localStorage.setItem('bookmarks',JSON.stringify('bookmarks'))
+    }
+    console.log(bookmaksArr);
+}
 
 // Handle Date from Form
 const storeBookmark =(e)=>{
@@ -51,7 +78,21 @@ const storeBookmark =(e)=>{
    if(!validate(nameValue,UrlValue)){
     return false
    }
+   const bookmak ={
+    name:nameValue,
+    url:UrlValue,
+   };
+   bookmaksArr.push(bookmak)
+   console.log(bookmaksArr);
+   localStorage.setItem('bookmarks',JSON.stringify(bookmaksArr))
+   fetchBookMark();
+   bookmarkForm.reset()
+   websiteNameEl.focus();
+
 }
 
 // Event LSitner
 bookmarkForm.addEventListener('submit',storeBookmark)
+
+// On Load 
+fetchBookMark()
